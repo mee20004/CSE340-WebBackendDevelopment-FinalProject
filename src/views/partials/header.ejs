@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> | MedTap</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header class="site-header">
+        <a href="/" class="brand">MedTap</a>
+        <nav class="site-nav">
+            <% if (currentUser) { %>
+                <% if (currentUser.role === 'patient') { %>
+                    <a href="/patient/dashboard">My Dashboard</a>
+                <% } else { %>
+                    <a href="/practice/dashboard">Practice Dashboard</a>
+                <% } %>
+                <div class="profile-menu-wrap">
+                    <button type="button" class="profile-icon-btn" onclick="toggleProfileMenu()" title="Profile menu">
+                        <%= (currentUser.firstName ? currentUser.firstName[0] : '') + (currentUser.lastName ? currentUser.lastName[0] : '') %>
+                    </button>
+                    <div class="profile-menu" id="profile-menu">
+                        <div class="profile-menu-info">
+                            <div class="profile-menu-name"><%= currentUser.firstName %> <%= currentUser.lastName %></div>
+                            <div class="profile-menu-role"><%= currentUser.role %></div>
+                        </div>
+                        <form method="POST" action="/logout">
+                            <button type="submit" class="profile-menu-item">Log Out</button>
+                        </form>
+                    </div>
+                </div>
+            <% } else { %>
+                <a href="/login">Log In</a>
+                <a href="/patient/register">Sign Up</a>
+            <% } %>
+        </nav>
+    </header>
+    <script>
+        function toggleProfileMenu() {
+            document.getElementById('profile-menu').classList.toggle('open');
+        }
+        document.addEventListener('click', (event) => {
+            const wrap = document.querySelector('.profile-menu-wrap');
+            if (wrap && !wrap.contains(event.target)) {
+                document.getElementById('profile-menu')?.classList.remove('open');
+            }
+        });
+    </script>
+    <main>

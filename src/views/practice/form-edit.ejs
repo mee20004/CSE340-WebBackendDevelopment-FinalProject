@@ -1,0 +1,180 @@
+<%- include('../partials/header') %>
+
+<% if (errors.length) { %>
+    <ul class="form-errors">
+        <% errors.forEach(function(error) { %><li><%= error.msg %></li><% }) %>
+    </ul>
+<% } %>
+
+<form id="form-builder" method="POST" action="<%= form.id ? `/practice/forms/${form.id}/edit` : '/practice/forms/new' %>">
+    <div class="builder-toolbar">
+        <div>
+            <div class="builder-toolbar-title"><%= form.id ? 'Edit form' : 'New form' %></div>
+            <div class="builder-toolbar-sub" id="block-summary">0 blocks in this form</div>
+        </div>
+        <div class="builder-toolbar-actions">
+            <a href="/practice/forms" class="btn-ghost">Cancel</a>
+            <button type="submit" class="btn-primary">Save form</button>
+        </div>
+    </div>
+
+    <div class="builder-meta-bar">
+        <label class="builder-meta-item">
+            <span class="builder-meta-label">Name</span>
+            <input type="text" name="title" placeholder="Standard Intake" value="<%= form.title || '' %>" required>
+        </label>
+        <label class="builder-meta-item">
+            <span class="builder-meta-label">Description</span>
+            <input type="text" name="description" placeholder="Optional" value="<%= form.description || '' %>">
+        </label>
+        <label class="builder-meta-item">
+            <span class="builder-meta-label">Appointment Type</span>
+            <input type="text" name="appointmentType" list="appointment-type-suggestions"
+                   placeholder="e.g. New Patient" value="<%= form.appointment_type || '' %>">
+            <datalist id="appointment-type-suggestions">
+                <option value="New Patient">
+                <option value="Follow-Up">
+                <option value="Annual Physical">
+                <option value="Urgent">
+            </datalist>
+        </label>
+        <% if (form.id) { %>
+            <label class="builder-meta-item builder-meta-toggle">
+                <input type="checkbox" name="isActive" <%= form.is_active ? 'checked' : '' %>>
+                <span class="builder-meta-label">Active</span>
+            </label>
+        <% } %>
+    </div>
+
+    <div class="builder-grid">
+        <div class="builder-pane canvas-pane">
+            <div class="builder-pane-head">Form flow</div>
+            <div id="builder-canvas"></div>
+        </div>
+        <div class="builder-pane palette-pane">
+            <div class="builder-pane-head">Block library</div>
+            <div id="builder-palette"></div>
+        </div>
+    </div>
+
+    <div id="hidden-blocks-container"></div>
+</form>
+
+<script>
+    const BLOCK_TYPES = [
+        { type: 'text', name: 'Short Text', description: 'A single-line answer' },
+        { type: 'textarea', name: 'Paragraph', description: 'A longer, multi-line answer' },
+        { type: 'select', name: 'Dropdown', description: 'Choose one from a list of options' },
+        { type: 'checkbox', name: 'Checkbox', description: 'A single yes/no toggle' },
+        { type: 'date', name: 'Date', description: 'A calendar date picker' },
+    ];
+
+    let blocks = <%- JSON.stringify((form.blocks || []).map(function(b) {
+        return {
+            label: b.label,
+            blockType: b.block_type,
+            isRequired: Boolean(b.is_required),
+            optionsText: (b.options && b.options.choices) ? b.options.choices.join(', ') : '',
+        };
+    })) %>;
+
+    function escapeHtml(str) {
+        return String(str || '').replace(/[&<>"']/g, (c) => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+        }[c]));
+    }
+
+    function addBlock(type) {
+        blocks.push({ label: '', blockType: type, isRequired: false, optionsText: '' });
+        renderCanvas();
+    }
+
+    function updateBlock(idx, field, value) {
+        blocks[idx][field] = value;
+        if (field === 'blockType') renderCanvas();
+    }
+
+    function moveBlock(idx, direction) {
+        const target = idx + direction;
+        if (target < 0 || target >= blocks.length) return;
+        [blocks[idx], blocks[target]] = [blocks[target], blocks[idx]];
+        renderCanvas();
+    }
+
+    function removeBlock(idx) {
+        blocks.splice(idx, 1);
+        renderCanvas();
+    }
+
+    function renderCanvas() {
+        const canvas = document.getElementById('builder-canvas');
+        document.getElementById('block-summary').textContent =
+            `${blocks.length} block${blocks.length === 1 ? '' : 's'} in this form`;
+
+        if (blocks.length === 0) {
+            canvas.innerHTML = `
+                <div class="builder-canvas-empty">
+                    <div class="builder-canvas-empty-title">Start building your intake flow</div>
+                    <div class="builder-canvas-empty-sub">Click a block in the library to add it here.</div>
+                </div>`;
+            return;
+        }
+
+        canvas.innerHTML = blocks.map((b, idx) => `
+            <div class="builder-flow-card">
+                <div class="builder-flow-card-head">
+                    <div class="builder-flow-order">Step ${idx + 1}</div>
+                    <div class="builder-card-actions">
+                        <button type="button" onclick="moveBlock(${idx}, -1)" ${idx === 0 ? 'disabled' : ''} title="Move up">&uarr;</button>
+                        <button type="button" onclick="moveBlock(${idx}, 1)" ${idx === blocks.length - 1 ? 'disabled' : ''} title="Move down">&darr;</button>
+                        <button type="button" class="remove-block" onclick="removeBlock(${idx})">Remove</button>
+                    </div>
+                </div>
+                <label class="builder-flow-label">Question
+                    <input type="text" value="${escapeHtml(b.label)}" oninput="updateBlock(${idx}, 'label', this.value)" placeholder="Untitled question">
+                </label>
+                <div class="builder-flow-row">
+                    <label class="builder-flow-label">Type
+                        <select onchange="updateBlock(${idx}, 'blockType', this.value)">
+                            ${BLOCK_TYPES.map((t) => `<option value="${t.type}" ${b.blockType === t.type ? 'selected' : ''}>${t.name}</option>`).join('')}
+                        </select>
+                    </label>
+                    <label class="checkbox-label builder-flow-required">
+                        <input type="checkbox" ${b.isRequired ? 'checked' : ''} onchange="updateBlock(${idx}, 'isRequired', this.checked)">
+                        Required
+                    </label>
+                </div>
+                ${b.blockType === 'select' ? `
+                    <label class="builder-flow-label">Choices (comma-separated)
+                        <input type="text" value="${escapeHtml(b.optionsText)}" oninput="updateBlock(${idx}, 'optionsText', this.value)" placeholder="Phone, Email, Text">
+                    </label>` : ''}
+            </div>
+        `).join('');
+    }
+
+    function renderPalette() {
+        const palette = document.getElementById('builder-palette');
+        palette.innerHTML = BLOCK_TYPES.map((t) => `
+            <button type="button" class="builder-block-card" onclick="addBlock('${t.type}')">
+                <span class="builder-block-card-name">${t.name}</span>
+                <span class="builder-block-card-desc">${t.description}</span>
+                <span class="builder-block-card-add">+ Add</span>
+            </button>
+        `).join('');
+    }
+
+    document.getElementById('form-builder').addEventListener('submit', () => {
+        const container = document.getElementById('hidden-blocks-container');
+        container.innerHTML = blocks.map((b, i) => `
+            <input type="hidden" name="blocks[${i}][label]" value="${escapeHtml(b.label)}">
+            <input type="hidden" name="blocks[${i}][blockType]" value="${b.blockType}">
+            <input type="hidden" name="blocks[${i}][optionsText]" value="${escapeHtml(b.optionsText)}">
+            ${b.isRequired ? `<input type="hidden" name="blocks[${i}][isRequired]" value="on">` : ''}
+        `).join('');
+    });
+
+    renderCanvas();
+    renderPalette();
+</script>
+
+<%- include('../partials/footer') %>

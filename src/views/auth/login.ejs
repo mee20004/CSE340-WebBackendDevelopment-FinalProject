@@ -1,0 +1,25 @@
+<%- include('../partials/header') %>
+
+<h1>Log In</h1>
+
+<% if (errors.length) { %>
+    <ul class="form-errors">
+        <% errors.forEach(function(error) { %>
+            <li><%= error.msg %></li>
+        <% }) %>
+    </ul>
+<% } %>
+
+<form method="POST" action="/login" class="auth-form">
+    <label for="email">Email</label>
+    <input type="email" id="email" name="email" value="<%= old.email || '' %>" required>
+
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" required>
+
+    <button type="submit">Log In</button>
+</form>
+
+<p>New patient? <a href="/patient/register">Create an account</a></p>
+
+<%- include('../partials/footer') %>

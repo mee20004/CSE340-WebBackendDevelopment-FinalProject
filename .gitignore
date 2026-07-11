@@ -1,0 +1,15 @@
+# Environment variables (contains secrets — never commit)
+.env
+
+# Dependencies
+node_modules/
+
+# OS / editor cruft
+.DS_Store
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Editor
+.vscode/*
+!.vscode/settings.json

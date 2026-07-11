@@ -1,0 +1,31 @@
+<%- include('../partials/header') %>
+
+<h1>My Dashboard</h1>
+
+<% if (sessions.length === 0) { %>
+    <div class="builder-canvas-empty">
+        <div class="builder-canvas-empty-title">No check-ins yet</div>
+        <div class="builder-canvas-empty-sub">A staff member will create one for your next visit.</div>
+    </div>
+<% } else { %>
+    <div class="form-card-grid">
+        <% sessions.forEach(function(s) { %>
+            <a href="/patient/checkin/<%= s.id %>" class="required-form-card status-<%= s.status %>">
+                <div class="required-form-card-head">
+                    <span class="required-form-card-title"><%= s.form_title %></span>
+                    <span class="status-badge status-<%= s.status %>"><%= s.status.replace('_', ' ') %></span>
+                </div>
+                <div class="required-form-card-meta"><%= new Date(s.created_at).toLocaleDateString() %></div>
+                <div class="required-form-card-action">
+                    <% if (s.status === 'created' || s.status === 'in_progress') { %>
+                        Continue &rarr;
+                    <% } else { %>
+                        View &rarr;
+                    <% } %>
+                </div>
+            </a>
+        <% }) %>
+    </div>
+<% } %>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,37 @@
+<%- include('../partials/header') %>
+
+<a href="/practice/dashboard" class="back-link">&larr; Back to dashboard</a>
+
+<h1>Check-In: <%= session.patient_first_name %> <%= session.patient_last_name %></h1>
+
+<p>
+    Form: <strong><%= session.form_title %></strong> ·
+    Status: <span class="status-badge status-<%= session.status %>"><%= session.status.replace('_', ' ') %></span>
+</p>
+<p>Created: <%= new Date(session.created_at).toLocaleString() %></p>
+<% if (session.submitted_at) { %><p>Submitted: <%= new Date(session.submitted_at).toLocaleString() %></p><% } %>
+<% if (session.closed_at) { %><p>Closed: <%= new Date(session.closed_at).toLocaleString() %></p><% } %>
+
+<% if (session.status === 'submitted') { %>
+    <form method="POST" action="/practice/sessions/<%= session.id %>/close">
+        <button type="submit">Mark Closed</button>
+    </form>
+<% } %>
+
+<h2>Responses</h2>
+<% if (Object.keys(answers).length === 0) { %>
+    <p>The patient hasn't submitted answers yet.</p>
+<% } else { %>
+    <table class="data-table">
+        <tbody>
+            <% form.blocks.forEach(function(block) { %>
+                <tr>
+                    <td><strong><%= block.label %></strong></td>
+                    <td><%= answers[block.id] || '—' %></td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+<% } %>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,70 @@
+<%- include('../partials/header') %>
+
+<div class="auth-wrap">
+    <div class="auth-card">
+        <div class="auth-logo">MedTap</div>
+        <div class="auth-sub">Patient intake, simplified.</div>
+
+        <div class="auth-tabs">
+            <button type="button" class="auth-tab" id="tab-login" onclick="switchAuthTab('login')">Sign in</button>
+            <button type="button" class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Create account</button>
+        </div>
+
+        <div id="panel-login" class="auth-panel">
+            <% if (loginErrors.length) { %>
+                <ul class="form-errors">
+                    <% loginErrors.forEach(function(error) { %><li><%= error.msg %></li><% }) %>
+                </ul>
+            <% } %>
+            <form method="POST" action="/login" class="auth-form-plain">
+                <label for="login-email">Email</label>
+                <input type="email" id="login-email" name="email" value="<%= loginOld.email || '' %>" required>
+
+                <label for="login-password">Password</label>
+                <input type="password" id="login-password" name="password" required>
+
+                <button type="submit" class="btn-primary btn-full">Sign in</button>
+            </form>
+        </div>
+
+        <div id="panel-register" class="auth-panel">
+            <% if (registerErrors.length) { %>
+                <ul class="form-errors">
+                    <% registerErrors.forEach(function(error) { %><li><%= error.msg %></li><% }) %>
+                </ul>
+            <% } %>
+            <form method="POST" action="/patient/register" class="auth-form-plain">
+                <label for="reg-firstName">First Name</label>
+                <input type="text" id="reg-firstName" name="firstName" value="<%= registerOld.firstName || '' %>" required>
+
+                <label for="reg-lastName">Last Name</label>
+                <input type="text" id="reg-lastName" name="lastName" value="<%= registerOld.lastName || '' %>" required>
+
+                <label for="reg-email">Email</label>
+                <input type="email" id="reg-email" name="email" value="<%= registerOld.email || '' %>" required>
+
+                <label for="reg-phone">Phone (optional)</label>
+                <input type="tel" id="reg-phone" name="phone" value="<%= registerOld.phone || '' %>">
+
+                <label for="reg-password">Password</label>
+                <input type="password" id="reg-password" name="password" minlength="8" required>
+
+                <button type="submit" class="btn-primary btn-full">Create account</button>
+            </form>
+        </div>
+
+        <p class="auth-note">Practice staff: use the Sign in tab with your provided credentials.</p>
+    </div>
+</div>
+
+<script>
+    function switchAuthTab(tab) {
+        document.getElementById('tab-login').classList.toggle('active', tab === 'login');
+        document.getElementById('tab-register').classList.toggle('active', tab === 'register');
+        document.getElementById('panel-login').classList.toggle('active', tab === 'login');
+        document.getElementById('panel-register').classList.toggle('active', tab === 'register');
+    }
+    switchAuthTab('<%= initialTab %>');
+</script>
+
+<%- include('../partials/footer') %>

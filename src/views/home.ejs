@@ -1,0 +1,27 @@
+<%- include('partials/header') %>
+
+<section class="hero">
+    <h1>MedTap</h1>
+    <p>Patient intake, simplified. Practices build check-in forms, patients fill them out from anywhere, and front-desk staff always know who's ready.</p>
+</section>
+
+<section class="portal-cards">
+    <div class="portal-card">
+        <h2>I'm a Patient</h2>
+        <p>Complete forms your provider has assigned to you and track their status, all in one place.</p>
+        <div class="portal-card-actions">
+            <a href="/patient/register" class="btn-primary">Create an Account</a>
+            <a href="/login">Log In</a>
+        </div>
+    </div>
+
+    <div class="portal-card">
+        <h2>I'm Practice Staff</h2>
+        <p>Build intake forms, create check-ins for your patients, and see live status from the front desk.</p>
+        <div class="portal-card-actions">
+            <a href="/login" class="btn-primary">Log In</a>
+        </div>
+    </div>
+</section>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,21 @@
+{
+  "name": "medtap",
+  "version": "0.1.0",
+  "description": "MedTap - patient intake and check-in platform (CSE 340 Final Project)",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "connect-pg-simple": "^10.0.0",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.21.0",
+    "express-session": "^1.18.1",
+    "express-validator": "^7.2.0",
+    "pg": "^8.13.0"
+  }
+}

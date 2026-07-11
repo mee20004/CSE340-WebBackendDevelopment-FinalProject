@@ -1,0 +1,64 @@
+<%- include('../partials/header') %>
+
+<a href="/patient/dashboard" class="back-link">&larr; Back to dashboard</a>
+
+<h1><%= form.title %></h1>
+<% if (form.description) { %><p><%= form.description %></p><% } %>
+
+<% if (typeof saved !== 'undefined' && saved) { %>
+    <p class="save-notice">Progress saved.</p>
+<% } %>
+
+<% if (errors.length) { %>
+    <ul class="form-errors">
+        <% errors.forEach(function(error) { %><li><%= error.msg %></li><% }) %>
+    </ul>
+<% } %>
+
+<% if (readOnly) { %>
+    <p><em>This check-in has been submitted and can no longer be edited.</em></p>
+    <table class="data-table">
+        <tbody>
+            <% form.blocks.forEach(function(block) { %>
+                <tr>
+                    <td><strong><%= block.label %></strong></td>
+                    <td><%= answers[block.id] || '—' %></td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+<% } else { %>
+    <form method="POST" action="/patient/checkin/<%= session.id %>/submit" class="auth-form" id="checkin-form">
+        <% form.blocks.forEach(function(block) { %>
+            <label for="block-<%= block.id %>">
+                <%= block.label %><% if (block.is_required) { %> *<% } %>
+            </label>
+
+            <% if (block.block_type === 'textarea') { %>
+                <textarea id="block-<%= block.id %>" name="answers[field_<%= block.id %>]" <%= block.is_required ? 'required' : '' %>><%= answers[block.id] || '' %></textarea>
+            <% } else if (block.block_type === 'select') { %>
+                <select id="block-<%= block.id %>" name="answers[field_<%= block.id %>]" <%= block.is_required ? 'required' : '' %>>
+                    <option value="">Select one</option>
+                    <% (block.options && block.options.choices ? block.options.choices : []).forEach(function(choice) { %>
+                        <option value="<%= choice %>" <%= answers[block.id] === choice ? 'selected' : '' %>><%= choice %></option>
+                    <% }) %>
+                </select>
+            <% } else if (block.block_type === 'checkbox') { %>
+                <input type="checkbox" id="block-<%= block.id %>" name="answers[field_<%= block.id %>]" value="Yes" <%= answers[block.id] === 'Yes' ? 'checked' : '' %>>
+            <% } else if (block.block_type === 'date') { %>
+                <input type="date" id="block-<%= block.id %>" name="answers[field_<%= block.id %>]" value="<%= answers[block.id] || '' %>" <%= block.is_required ? 'required' : '' %>>
+            <% } else { %>
+                <input type="text" id="block-<%= block.id %>" name="answers[field_<%= block.id %>]" value="<%= answers[block.id] || '' %>" <%= block.is_required ? 'required' : '' %>>
+            <% } %>
+        <% }) %>
+
+        <button type="submit" formnovalidate formaction="/patient/checkin/<%= session.id %>/save">Save Progress</button>
+        <button type="submit" class="primary-submit">Submit Check-In</button>
+    </form>
+
+    <form method="POST" action="/patient/checkin/<%= session.id %>/cancel" onsubmit="return confirm('Cancel this check-in?');">
+        <button type="submit">Cancel Check-In</button>
+    </form>
+<% } %>
+
+<%- include('../partials/footer') %>

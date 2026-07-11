@@ -1,0 +1,36 @@
+<%- include('../partials/header') %>
+
+<h1>Practice Dashboard</h1>
+
+<p>
+    <a href="/practice/sessions/new">+ New Check-In</a> ·
+    <a href="/practice/forms">Manage Forms</a>
+    <% if (currentUser.role === 'owner') { %> · <a href="/practice/staff">Manage Staff</a><% } %>
+</p>
+
+<% if (sessions.length === 0) { %>
+    <p>No check-ins yet. Start one from the link above.</p>
+<% } else { %>
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Patient</th>
+                <th>Form</th>
+                <th>Status</th>
+                <th>Created</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% sessions.forEach(function(s) { %>
+                <tr>
+                    <td><a href="/practice/sessions/<%= s.id %>"><%= s.patient_first_name %> <%= s.patient_last_name %></a></td>
+                    <td><%= s.form_title %></td>
+                    <td><span class="status-badge status-<%= s.status %>"><%= s.status.replace('_', ' ') %></span></td>
+                    <td><%= new Date(s.created_at).toLocaleString() %></td>
+                </tr>
+            <% }) %>
+        </tbody>
+    </table>
+<% } %>
+
+<%- include('../partials/footer') %>

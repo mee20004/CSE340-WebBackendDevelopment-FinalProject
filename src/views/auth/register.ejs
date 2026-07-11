@@ -1,0 +1,34 @@
+<%- include('../partials/header') %>
+
+<h1>Create Your Patient Account</h1>
+
+<% if (errors.length) { %>
+    <ul class="form-errors">
+        <% errors.forEach(function(error) { %>
+            <li><%= error.msg %></li>
+        <% }) %>
+    </ul>
+<% } %>
+
+<form method="POST" action="/patient/register" class="auth-form">
+    <label for="firstName">First Name</label>
+    <input type="text" id="firstName" name="firstName" value="<%= old.firstName || '' %>" required>
+
+    <label for="lastName">Last Name</label>
+    <input type="text" id="lastName" name="lastName" value="<%= old.lastName || '' %>" required>
+
+    <label for="email">Email</label>
+    <input type="email" id="email" name="email" value="<%= old.email || '' %>" required>
+
+    <label for="phone">Phone (optional)</label>
+    <input type="tel" id="phone" name="phone" value="<%= old.phone || '' %>">
+
+    <label for="password">Password</label>
+    <input type="password" id="password" name="password" minlength="8" required>
+
+    <button type="submit">Create Account</button>
+</form>
+
+<p>Already have an account? <a href="/login">Log in</a></p>
+
+<%- include('../partials/footer') %>
